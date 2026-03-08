@@ -11,6 +11,8 @@ class ZimnaWorkflow:
         self.client = genai.Client(api_key=api_key)
 
     def process_user_input(self, raw_text):
+        model_id = "gemini-3-flash-preview"
+
         # Schema for the agent to follow strictly
         prompt = f"""
         User Input: "{raw_text}"
@@ -56,26 +58,20 @@ class ZimnaWorkflow:
         If the input is unclear or incomplete, ask the user for more details to clarify their goals before proceeding.
         """
 
-        response = self.client.models.generate_content(
-            model="gemini-3-flash-preview",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json"
-            )
-        )
-
         try:
-            data = json.loads(response.text)
+            response = self.client.models.generate_content(
+                model=model_id,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json"
+                )
+            )
 
-            # This checks if it is the expected list format
-            if isinstance(data, list):
-                return data
-            else:
-                # This handles cases where Gemimi returns a single object or a message instead of a list
-                return [{"error": "clarification", "message": data}]
+            data = json.loads(response.text)
+            return data if isinstance(data, list) else [{"error": "classification", "message": data}]
             
-        except (json.JSONDecodeError, TypeError):
-            return [{"error": "invalid_format", "message": response.text}]
+        except Exception as e:
+            return [{"error": "ai_error", "message": str(e)}]
     
 
     
@@ -85,7 +81,7 @@ class ZimnaWorkflow:
         ai_response = self.process_user_input(raw_input)
 
         # If the first item is an error, stop here
-        if isinstance(ai_response, list) and "error" in ai_response[0]:
+        if isinstance(ai_response, list) and len(ai_response) > 0 and "error" in ai_response[0]:
             return ai_response
 
         created_goals = []
@@ -93,24 +89,24 @@ class ZimnaWorkflow:
         # Use a transaction to ensure a all-or-nothing saving
         with transaction.atomic():
             for item in ai_response:
-                # Create the Goal
-                goal = Goal.objects.create(
+                # Create the  New Goal
+                new_goal = Goal.objects.create(
                     user = user,
-                    title = item['title'],
-                    description = item['description'],
+                    title = item.get('title', 'Untitled Goal'),
+                    description = item.get('description', ''),
                     raw_input = raw_input,
-                    due_date = item.get('due_date')
+                    due_date = item.get('due_date') if item.get('due_date') else None
                 )
 
-                # Create the associated Task
-                for task_data in item.get('tasks', []):
+                # Create the associated New Task
+                for t_data in item.get('tasks', []):
                     Task.objects.create(
-                        goal = goal,
-                        title = task_data['title'],
-                        description = task_data['description']
+                        goal = new_goal,
+                        title = t_data.get('title', 'Untitled Task'),
+                        description = t_data.get('description', '')
                     )
 
-                created_goals.append(goal)
+                created_goals.append(new_goal)
 
         return created_goals
     
