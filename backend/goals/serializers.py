@@ -7,4 +7,4 @@ class GoalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Goal
-        fields = []
+        fields = ['id', 'title', 'description', 'due_date', 'tasks']
