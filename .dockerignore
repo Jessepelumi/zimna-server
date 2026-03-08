@@ -1,0 +1,39 @@
+# Git & System
+.git
+.gitignore
+.DS_Store
+Thumbs.db
+
+# Docker & Environment
+.env
+.dockerignore
+Dockerfile
+docker-compose.yml
+docker-compose.override.yml
+
+# Frontend (Next.js)
+# We ignore these so Docker doesn't copy the massive Mac versions into the Linux container
+**/node_modules/
+**/frontend/.next/
+**/frontend/out/
+**/frontend/build/
+**/frontend/.vercel/
+**/frontend/npm-debug.log*
+
+# Backend (Django)
+# We ignore the local virtual environment and cached bytecode
+**/venv/
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/backend/db.sqlite3
+**/backend/media/
+**/backend/static_root/
+
+# IDE & Tools
+.vscode/
+.idea/
+*.swp
+*.bak

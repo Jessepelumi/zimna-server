@@ -1,0 +1,31 @@
+services:
+  # Django backend for Zimna
+  backend:
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      # Pulled directly from the .env file
+      - PGHOST=${PGHOST}
+      - PGDATABASE=${PGDATABASE}
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGPORT=${PGPORT}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DEBUG=${DEBUG}
+      - DATABASE_URL=postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}:${PGPORT}/${PGDATABASE}?sslmode=require
+
+  # Nextjs frontend for Zimna
+  frontend:
+    build: ./frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
