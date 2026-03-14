@@ -10,41 +10,29 @@ import { examplePrompts } from "@/static/examplePrompts";
 import { ExamplePromptCard } from "@/components/custom/examplePrompt";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { useMutation } from "@tanstack/react-query";
+import { zimnaApi } from "@/lib/api";
 
 export default function Home() {
   const [showExamples, setShowExamples] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const mutation = useMutation({
+    mutationFn: (text: string) => zimnaApi.decomposeGoal(text),
+    onSuccess: (data) => {
+      console.log("Goal created!", data);
+      setInputValue("");
+      // TODO: trigger success toast and redirect
+    },
+    onError: (error: any) => {
+      alert(error.message);
+    },
+  });
+
   const handleSubmit = async () => {
-    if (!inputValue.trim()) return;
-
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("http://localhost:8000/api/decompose/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${process.env.NEXT_PUBLIC_ZIMNA_AUTH}`, // Temporal auth // TODO: Modify auth
-        },
-        body: JSON.stringify({ text: inputValue }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        console.log("Success! Goals created:", data);
-        setInputValue("");
-        // TODO: Redirect the user to the dashboard
-      } else {
-        console.error("AI Error:", data);
-        alert(data.message || "Something went wrong");
-      }
-    } catch (error) {
-      console.error("Connection Error:", error);
-    } finally {
-      setIsLoading(false);
+    if (inputValue.trim()) {
+      mutation.mutate(inputValue);
     }
   };
 
@@ -128,7 +116,7 @@ export default function Home() {
               <div>
                 <button
                   onClick={handleSubmit}
-                  disabled={isLoading}
+                  disabled={mutation.isPending}
                   className="p-2 rounded-lg text-blue-600 bg-linear-to-r from-blue-200 via-blue-200 via-20% to-purple-300 hover:text-blue-700"
                 >
                   <ArrowRightIcon size={20} />
