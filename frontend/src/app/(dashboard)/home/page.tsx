@@ -14,6 +14,39 @@ import { cn } from "@/lib/utils";
 export default function Home() {
   const [showExamples, setShowExamples] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    if (!inputValue.trim()) return;
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/decompose/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Basic ${process.env.NEXT_PUBLIC_ZIMNA_AUTH}`, // Temporal auth // TODO: Modify auth
+        },
+        body: JSON.stringify({ text: inputValue }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log("Success! Goals created:", data);
+        setInputValue("");
+        // TODO: Redirect the user to the dashboard
+      } else {
+        console.error("AI Error:", data);
+        alert(data.message || "Something went wrong");
+      }
+    } catch (error) {
+      console.error("Connection Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleExampleClick = (text: string) => {
     setInputValue(text);
@@ -72,7 +105,12 @@ export default function Home() {
             <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask whatever you want..."
+              disabled={isLoading}
+              placeholder={
+                isLoading
+                  ? "Zimna is decomposing..."
+                  : "Ask whatever you want..."
+              }
               className="[field-sizing-content] w-full min-h-10 max-h-48 p-2 outline-none border-none resize-none overflow-y-auto text-sm"
             ></textarea>
 
@@ -88,7 +126,11 @@ export default function Home() {
               </div>
 
               <div>
-                <button className="p-2 rounded-lg text-blue-600 bg-linear-to-r from-blue-200 via-blue-200 via-20% to-purple-300 hover:text-blue-700">
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="p-2 rounded-lg text-blue-600 bg-linear-to-r from-blue-200 via-blue-200 via-20% to-purple-300 hover:text-blue-700"
+                >
                   <ArrowRightIcon size={20} />
                 </button>
               </div>
