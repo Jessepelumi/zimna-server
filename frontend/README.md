@@ -1,8 +1,62 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Zimna AI
+
+Zimna AI is a personalized productivity application that helps users break down their goals into actionable objectives and tasks using AI-powered goal decomposition.
+
+### Features
+
+- **Goal Input**: Enter your goals in natural language
+- **AI Decomposition**: Automatically break down goals into manageable objectives
+- **Dashboard**: View and manage your goals and objectives
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+### Tech Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS with shadcn/ui components
+- **State Management**: TanStack Query for server state
+- **Icons**: Phosphor Icons and Lucide React
+- **Backend**: REST API integration
+
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm, yarn, pnpm, or bun
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd zimna-ai
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+# or
+bun install
+```
+
+3. Set up environment variables:
+   Create a `.env.local` file in the root directory:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_ZIMNA_AUTH=<your-basic-auth-token>
+```
+
+### Running the Development Server
 
 ```bash
 npm run dev
@@ -16,9 +70,54 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Building for Production
+
+```bash
+npm run build
+npm start
+```
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (dashboard)/
+│   │   ├── goals/page.tsx
+│   │   ├── home/page.tsx
+│   │   └── objectives/page.tsx
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/
+│   ├── custom/
+│   │   ├── examplePrompt.tsx
+│   │   ├── sectionHeader.tsx
+│   │   ├── sidebar.tsx
+│   │   └── sidebarItem.tsx
+│   ├── providers/
+│   │   └── QueryProvider.tsx
+│   └── ui/
+│       ├── button.tsx
+│       ├── input.tsx
+│       └── sheet.tsx
+├── lib/
+│   ├── api.ts
+│   └── utils.ts
+└── static/
+    └── examplePrompts.tsx
+```
+
+## API Integration
+
+The app integrates with a backend API for goal decomposition. The API endpoint expects:
+
+- **Endpoint**: `/decompose/`
+- **Method**: POST
+- **Body**: `{ "text": "your goal text" }`
+- **Auth**: Basic Auth using `NEXT_PUBLIC_ZIMNA_AUTH`
 
 ## Learn More
 
