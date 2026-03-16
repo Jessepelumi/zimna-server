@@ -1,5 +1,20 @@
 const BASE_URL = process.env.BASE_URL || "http://localhost:8000/api";
 
+export interface Task {
+  id: number;
+  title: string;
+  description: string;
+  is_completed: boolean;
+}
+
+export interface Goal {
+  id: number;
+  title: string;
+  description: string;
+  due_date: string | null;
+  task: Task[];
+}
+
 export const zimnaApi = {
   // Central fetcher to handle errors and headers in one place
   async fetcher<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
@@ -21,8 +36,8 @@ export const zimnaApi = {
   },
 
   // Method for goal decomposition
-  decomposeGoal: (text: string) =>
-    zimnaApi.fetcher("/decompose/", {
+  decomposeGoal: (text: string): Promise<Goal[]> =>
+    zimnaApi.fetcher<Goal[]>("/decompose/", {
       method: "POST",
       body: JSON.stringify({ text }),
     }),
