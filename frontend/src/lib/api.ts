@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+const BASE_URL = process.env.BASE_URL || "http://localhost:8000/api";
 
 export const zimnaApi = {
   // Central fetcher to handle errors and headers in one place
@@ -7,7 +7,7 @@ export const zimnaApi = {
       ...options,
       headers: {
         "Content-Type": "application/json",
-        Autorization: `Basic ${process.env.NEXT_PUBLIC_ZIMNA_AUTH}`,
+        Authorization: `Basic ${process.env.NEXT_PUBLIC_ZIMNA_AUTH}`,
         ...options.headers,
       },
     });
