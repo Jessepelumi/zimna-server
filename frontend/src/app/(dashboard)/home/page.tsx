@@ -16,7 +16,6 @@ import { zimnaApi } from "@/lib/api";
 export default function Home() {
   const [showExamples, setShowExamples] = useState(false);
   const [inputValue, setInputValue] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
   const mutation = useMutation({
     mutationFn: (text: string) => zimnaApi.decomposeGoal(text),
