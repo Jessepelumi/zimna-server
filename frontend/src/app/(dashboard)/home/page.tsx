@@ -11,14 +11,15 @@ import { ExamplePromptCard } from "@/components/custom/examplePrompt";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
-import { Goal, zimnaApi } from "@/lib/api";
+import { goalsApi } from "@/lib/api/goals";
+import { Goal } from "@/lib/api/types";
 
 export default function Home() {
   const [showExamples, setShowExamples] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
   const mutation = useMutation({
-    mutationFn: (text: string) => zimnaApi.decomposeGoal(text),
+    mutationFn: (text: string) => goalsApi.decompose(text),
     onSuccess: (data: Goal[]) => {
       console.log("Goal created!", data);
       setInputValue("");
