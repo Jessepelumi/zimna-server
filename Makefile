@@ -10,7 +10,7 @@ help:
 	@echo "  make down       - Stop all containers"
 	@echo "  make build      - Rebuild containers (no cache)"
 	@echo "  make restart    - Restart all services"
-	@echo "  make logs       - Follow backend logs"
+	@echo "  make logs       - Follow logs"
 	@echo "  make shell      - Open Django shell inside container"
 	@echo "  make migrate    - Run Django database migrations"
 	@echo "  make superuser  - Create a new Django admin user"
@@ -30,7 +30,7 @@ restart:
 	$(COMPOSE) restart
 
 logs:
-	$(COMPOSE) logs -f $(BACKEND_SVC)
+	$(COMPOSE) logs -f
 
 # Django Commands
 migrate:
