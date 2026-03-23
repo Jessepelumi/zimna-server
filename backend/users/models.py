@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
@@ -36,6 +37,13 @@ class UserManager(BaseUserManager):
 
 # user class
 class User(AbstractUser):
+
+    # override the default auto-incrementing integer 
+    id = models.UUIDField(
+        primary_key=True, 
+        default=uuid.uuid4, 
+        editable=False
+    )
 
     # optional username
     username = models.CharField(
