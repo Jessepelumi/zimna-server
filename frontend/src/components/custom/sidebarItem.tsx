@@ -6,6 +6,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React from "react";
 
+import { signOut } from "next-auth/react";
+
 interface SidebarItemProps {
   icon: React.ElementType<IconProps>;
   text: string;
@@ -63,8 +65,17 @@ export const SidebarItemVariant = ({
 };
 
 export const LogOut = () => {
+  const handleLogout = async () => {
+    // This clears the NextAuth cookie and the Django session/JWT
+    // from the browser's memory.
+    await signOut({
+      callbackUrl: "/", 
+      redirect: true,
+    });
+  };
+
   return (
-    <button className="p-0">
+    <button onClick={handleLogout} className="p-0">
       <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-red-600 bg-red-100 hover:text-red-700 hover:bg-red-200">
         <SignOutIcon size={20} />
         Log out
