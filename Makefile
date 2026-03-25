@@ -18,7 +18,7 @@ help:
 
 # Docker Commands
 up:
-	$(COMPOSE) up -d
+	$(COMPOSE) up
 
 down:
 	$(COMPOSE) down
