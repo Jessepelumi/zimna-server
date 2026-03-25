@@ -1,4 +1,5 @@
 // Core API Client
+import { getSession } from "next-auth/react";
 
 const BASE_URL = "/api";
 
@@ -17,9 +18,12 @@ export async function apiClient<T>(
     ...(rest.headers as Record<string, string>),
   });
 
-  // Only attach auth if needed
-  if (auth && process.env.NEXT_PUBLIC_ZIMNA_AUTH) {
-    headers.set("Authorization", `Basic ${process.env.NEXT_PUBLIC_ZIMNA_AUTH}`);
+  // Automatically attach the Django JWT if auth is required
+  if (auth) {
+    const session = await getSession();
+    if (session?.accessToken) {
+      headers.set("Authorization", `Bearer ${session.accessToken}`);
+    }
   }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -29,11 +33,8 @@ export async function apiClient<T>(
 
   if (!response.ok) {
     const text = await response.text();
-    console.error("API ERROR:", {
-      endpoint,
-      status: response.status,
-      body: text,
-    });
+    // Handle 401 error
+    if (response.status === 404) console.error("Endpoint not found:", endpoint);
 
     throw new Error(`Error ${response.status}: ${text}`);
   }
