@@ -1,12 +1,12 @@
 export interface Task {
-  id: number;
+  id: string;
   title: string;
   description: string;
   is_completed: boolean;
 }
 
 export interface Goal {
-  id: number;
+  id: string;
   title: string;
   description: string;
   due_date: string | null;
