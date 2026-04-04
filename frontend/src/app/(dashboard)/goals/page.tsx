@@ -1,70 +1,49 @@
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+"use client";
+
+import { useGoals } from "@/hooks/useGoals";
+import { GoalAccordion } from "@/components/custom/goalAccordion";
 
 export default function Goals() {
+  const { data: goals, isLoading, isError } = useGoals();
+
+  if (isLoading) {
+    return (
+      <div className="p-8 flex justify-center">
+        <span className="animate-pulse text-slate-500">
+          Loading your goals...
+        </span>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 text-red-500 text-center">
+        Failed to load goals. Please check your connection.
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col items-center w-full">
-      <Sheet>
-        <div className="w-full md:w-3/5 lg:w-2/5 space-y-5">
-          <header>Your Goals</header>
+    <div className="w-full space-y-5">
+      <div>
+        <h1 className="text-2xl">Dashboard</h1>
+        <p className="text-gray-400 text-sm w-2/3 lg:w-full">
+          These are your goals. Toggle the tile to view the associated tasks.
+        </p>
+      </div>
 
-          <section className="w-full">
-            <SheetTrigger asChild>
-              <GoalButton
-                title="Complete Cooking Classes and Exams"
-                count={15}
-                description="Finish all curriculum modules for current cooking classes and
-        successfully pass the practical exams by the end of May."
-              />
-            </SheetTrigger>
-          </section>
+      {goals?.map((goal) => (
+        <GoalAccordion key={goal.id} title={goal.title} tasks={goal.tasks} />
+      ))}
 
-          <SheetContent className="">
-            <SheetHeader>
-              <SheetTitle className="font-normal pt-5">Goal Title</SheetTitle>
-              <SheetDescription>Goal description goes here</SheetDescription>
-            </SheetHeader>
-
-            <div className="px-5">
-              <h1>Task list</h1>
-            </div>
-
-            <SheetFooter></SheetFooter>
-          </SheetContent>
+      {goals?.length === 0 && (
+        <div className="text-center py-20 border-2 border-dashed rounded-xl">
+          <p className="text-slate-400">
+            No goals found. Start by creating one!
+          </p>
         </div>
-      </Sheet>
+      )}
     </div>
   );
 }
-
-interface GoalButtonProps {
-  title: string;
-  description: string;
-  count: number;
-}
-
-const GoalButton = ({ title, description, count }: GoalButtonProps) => {
-  return (
-    <button className="group w-full border p-3 rounded-lg text-start hover:border-blue-500 hover:shadow-sm transition-all">
-      <div className="flex gap-2 justify-between items-center mb-1">
-        <h1 className="flex-1 min-w-0 truncate line-clamp-1 group-hover:text-blue-700 transition-colors">
-          {title}
-        </h1>
-        <span className="shrink-0 text-xs text-gray-500 w-fit">
-          {count} tasks
-        </span>
-      </div>
-
-      <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
-        {description}
-      </p>
-    </button>
-  );
-};
