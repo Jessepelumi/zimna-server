@@ -3,6 +3,7 @@ export interface Task {
   title: string;
   description: string;
   is_completed: boolean;
+  due_date: Date;
 }
 
 export interface Goal {
