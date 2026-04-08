@@ -1,46 +1,70 @@
-const BACKEND_URL = process.env.BASE_URL!;
+import { NextRequest, NextResponse } from "next/server";
 
-async function handler(req: Request, path: string[]) {
-  // Don't proxy URL meant for NextAuth
-  if (path[0] === "auth") {
-    return new Response(null, { status: 404 }); 
+const BACKEND_URL = process.env.BASE_URL;
+
+async function proxyHandler(
+  req: NextRequest,
+  { params }: { params: Promise<{ path: string[] }> },
+) {
+  const resolvedParams = await params;
+  const pathSegments = resolvedParams.path;
+
+  // Prevent proxying NextAuth routes
+  if (pathSegments[0] === "auth") {
+    return new NextResponse(null, { status: 404 });
   }
 
-  const url = `${BACKEND_URL}/${path.filter(Boolean).join("/")}/`;
+  // Construct the backend URL
+  // Ensure we add a trailing slash for Django compatibility
+  const relativePath = pathSegments.filter(Boolean).join("/");
+  const url = `${BACKEND_URL}/${relativePath}/`;
 
-  // Capture the Authorization header sent by our apiClient
+  // Prepare headers (Forward the JWT)
   const authHeader = req.headers.get("authorization");
-
-  const response = await fetch(url, {
-    method: req.method,
-    headers: {
-      "Content-Type": "application/json",
-      // Pass the Bearer token through to the backend
-      ...(authHeader ? { "Authorization": authHeader } : {}),
-    },
-    body: req.method !== "GET" ? await req.text() : undefined,
+  const headers = new Headers({
+    "Content-Type": "application/json",
   });
+  if (authHeader) headers.set("Authorization", authHeader);
 
-  return new Response(await response.text(), {
-    status: response.status,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  // Extract body for non-GET requests
+  let body = undefined;
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    try {
+      body = await req.text();
+    } catch (e) {
+      console.error("Failed to parse request body:", e);
+    }
+  }
+
+  try {
+    const response = await fetch(url, {
+      method: req.method,
+      headers,
+      body,
+      // For Next.js caching control
+      cache: "no-store",
+    });
+
+    const data = await response.text();
+
+    return new NextResponse(data, {
+      status: response.status,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {
+    console.error("Proxy Error:", error);
+    return NextResponse.json(
+      { error: "Failed to connect to backend service" },
+      { status: 502 },
+    );
+  }
 }
 
-export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ path: string[] }> },
-) {
-  const resolvedParams = await params;
-  return handler(req, resolvedParams.path);
-}
-
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ path: string[] }> },
-) {
-  const resolvedParams = await params;
-  return handler(req, resolvedParams.path);
-}
+// Exporting all necessary methods using the same handler
+export const GET = proxyHandler;
+export const POST = proxyHandler;
+export const PUT = proxyHandler;
+export const PATCH = proxyHandler;
+export const DELETE = proxyHandler;
