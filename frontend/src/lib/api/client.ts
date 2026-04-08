@@ -1,5 +1,5 @@
 // Core API Client
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 const BASE_URL = "/api";
 
@@ -32,10 +32,18 @@ export async function apiClient<T>(
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    // Handle 401 error
-    if (response.status === 404) console.error("Endpoint not found:", endpoint);
+    // Handle 401 Unauthorized (JWT Expired)
+    if (response.status === 401) {
+      console.warn("Session expired. Signing out...");
+      await signOut({ callbackUrl: "/login" });
+      throw new Error("Session expired. Please log in again.");
+    }
 
+    if (response.status === 404) {
+      console.error("Endpoint not found:", endpoint);
+    }
+
+    const text = await response.text();
     throw new Error(`Error ${response.status}: ${text}`);
   }
 
