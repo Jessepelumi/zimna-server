@@ -5,6 +5,7 @@ from goals.models import Goal # Goal model
 from tasks.models import Task # Task model
 from ai.providers.gemini_provider import GeminiProvider
 from ai.prompts.goal_decomposition_prompt import DECOMPOSITION_SYSTEM_PROMPT
+from conversations.models import Conversation, Message
 
 class ZimnaWorkflow:
     def __init__(self, api_key):
@@ -15,18 +16,18 @@ class ZimnaWorkflow:
         The main entry point. Orchestrates AI decomposition and DB persistence.
         """
 
-        # 1. Prepare the dynamic prompt
+        # Prepare the dynamic prompt
         full_prompt = f"{DECOMPOSITION_SYSTEM_PROMPT}\n\nUser Input: '{raw_input}'\nCurrent Date: {timezone.now().date()}"
 
         try:
-            # 2. Get structured JSON from the provider
+            # Get structured JSON from the provider
             ai_json_str = self.provider.generate_structured_response(full_prompt)
             ai_response = json.loads(ai_json_str)
 
             if not isinstance(ai_response, list):
                 return [{"error": "ai_format_error", "message": "Expected a list of goals."}]
 
-            # 3. Save to Neon using an atomic transaction
+            # Save to Neon using an atomic transaction
             return self._persist_to_db(user, raw_input, ai_response)
 
         except Exception as e:
@@ -59,6 +60,17 @@ class ZimnaWorkflow:
                 Task.objects.bulk_create(tasks_to_create)
 
                 created_goals.append(new_goal)
+                
+            # Associate the conversation with the FIRST goal created for the chat context
+            if created_goals:
+                primary_goal = created_goals[0]
+                conversation, _ = Conversation.objects.get_or_create(goal=primary_goal, user=user)
+                Message.objects.create(
+                    conversation=conversation,
+                    role='model',
+                    content=f"I've successfully broken down '{primary_goal.title}' into actionable steps! How would you like to start?"
+                )
 
         return created_goals
+    
     
