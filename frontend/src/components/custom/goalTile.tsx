@@ -16,7 +16,7 @@ export const GoalTile = ({ title, count, isOpen, onToggle }: GoalTileProps) => {
   return (
     <div
       onClick={onToggle}
-      className={`flex justify-between items-center gap-2 w-full border border-gray-200 ${isOpen ? "bg-blue-50" : ""} hover:bg-blue-50 px-5 py-3 rounded-lg`}
+      className={`flex justify-between items-center gap-2 w-full border border-gray-200 cursor-default ${isOpen ? "bg-blue-50" : ""} hover:bg-blue-50 px-5 py-3 rounded-lg`}
     >
       <div className="flex items-center">
         <div className="pr-3 flex items-center justify-center">
