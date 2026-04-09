@@ -53,9 +53,10 @@ This app manages goals and the AI-driven decomposition of raw user input.
 
 - `models.py` — Defines the `Goal` model with fields for user, title, description, due date, completion status, and raw input.
 - `serializers.py` — Serializes goals and nests related tasks.
-- `views.py` — Contains two main views:
+- `views.py` — Contains three main views:
   - `DecomposeGoalView` — Receives raw text, runs AI decomposition, and creates goals and tasks.
   - `GoalListView` — Lists the authenticated user's goals with nested tasks.
+  - `DeleteGoalView` — Deletes a specific goal by UUID for the authenticated user.
 - `urls.py` — Registers goal-related endpoints.
 - `management/commands/smartify.py` — CLI command that also uses the AI workflow to create goals from text.
 - `migrations/` — Database migration files for goal models.
@@ -76,9 +77,11 @@ This app manages chat conversations between users and the AI assistant.
 
 - `models.py` — Defines `Conversation` and `Message` models; conversations link to a `Goal` and a `User`, and messages store content and role.
 - `serializers.py` — Serializes conversations and nested messages.
-- `views.py` — `ChatAPIView` receives chat messages, ensures a conversation exists, and routes the message to AI handling logic.
+- `views.py` — Contains two main views:
+  - `ChatAPIView` — Receives chat messages, ensures a conversation exists, and routes the message to AI handling logic.
+  - `ConversationHistoryView` — Retrieves the message history for a specific goal's conversation.
 - `services.py` — Contains `handle_zimna_logic`, which classifies intent, persists chat messages, and generates AI responses.
-- `urls.py` — Registers the chat endpoint.
+- `urls.py` — Registers the chat and history endpoints.
 - `migrations/` — Database migration files for conversation and message models.
 
 ### `workflow/`
@@ -123,6 +126,13 @@ This package contains provider wrappers and prompt definitions for AI.
 3. It prefetches related `tasks` to avoid extra queries.
 4. It serializes goals and nested tasks and returns them.
 
+### Goal Deletion
+
+1. The frontend sends `DELETE /api/<uuid>/` with the goal UUID.
+2. `goals.views.DeleteGoalView` verifies the goal belongs to the authenticated user.
+3. It deletes the goal and associated tasks (via cascade).
+4. Returns a 204 No Content response.
+
 ### Conversation and Chat Flow
 
 1. The frontend sends a chat message to `POST /api/conversations/chat/` with either `goal_id` or `conversation_id`.
@@ -133,6 +143,13 @@ This package contains provider wrappers and prompt definitions for AI.
 6. If the intent is `QUERY`, it returns a placeholder response.
 7. If the intent is `CHAT`, it builds chat history and calls `GeminiProvider.generate_response()`.
 8. The AI response is saved as a `Message` and returned.
+
+### Conversation History Retrieval
+
+1. The frontend requests `GET /api/conversations/history/<uuid>/` with a goal UUID.
+2. `conversations.views.ConversationHistoryView` finds the latest conversation for that goal and user.
+3. It retrieves all messages in chronological order.
+4. Returns the serialized message history.
 
 ## Data Relationships
 
@@ -153,7 +170,9 @@ This package contains provider wrappers and prompt definitions for AI.
 - `POST /api/users/auth/bridge/` — Authenticate internal users and return JWT.
 - `POST /api/decompose/` — Convert raw input into goals and tasks.
 - `GET /api/list/` — Retrieve authenticated user's goals and tasks.
+- `DELETE /api/<uuid>/` — Delete a specific goal by UUID.
 - `POST /api/conversations/chat/` — Send chat messages and receive AI responses.
+- `GET /api/conversations/history/<uuid>/` — Retrieve conversation history for a goal.
 
 ## Running the Backend
 
