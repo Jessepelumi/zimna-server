@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ArrowRightIcon,
-  CaretDownIcon,
-  MicrophoneIcon,
-  PaperclipIcon,
-} from "@phosphor-icons/react/dist/ssr";
+import { CaretDownIcon } from "@phosphor-icons/react/dist/ssr";
 import { examplePrompts } from "@/static/examplePrompts";
 import { ExamplePromptCard } from "@/components/custom/examplePrompt";
 import { useState } from "react";
@@ -13,8 +8,12 @@ import { cn } from "@/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { goalsApi } from "@/lib/api/goals";
 import { Goal } from "@/lib/api/types";
+import { PromptField } from "@/components/custom/promptField";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
   const [showExamples, setShowExamples] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -23,7 +22,13 @@ export default function Home() {
     onSuccess: (data: Goal[]) => {
       console.log("Goal created!", data);
       setInputValue("");
-      // TODO: trigger success toast and redirect
+
+      if (data && data.length > 0) {
+        const primaryGoalId = data[0].id;
+
+        // Redirect user to the console for this specific goal
+        router.push(`/console/${primaryGoalId}`);
+      }
     },
     onError: (error: Error) => {
       alert(error.message);
@@ -88,43 +93,13 @@ export default function Home() {
           )}
         </div>
 
-        <div className="bg-linear-to-r from-blue-300 via-purple-300 via-50% to-purple-400 rounded-xl p-1">
-          <div className="flex flex-col gap-3 p-1.5 rounded-lg bg-white">
-            <textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              disabled={mutation.isPending}
-              placeholder={
-                mutation.isPending
-                  ? "Zimna is decomposing..."
-                  : "Ask whatever you want..."
-              }
-              className="[field-sizing-content] w-full min-h-10 max-h-48 p-2 outline-none border-none resize-none overflow-y-auto text-sm"
-            ></textarea>
-
-            <div className="flex justify-between items-center">
-              <div className="flex gap-3 px-1">
-                <button className="text-gray-500 hover:text-blue-700">
-                  <MicrophoneIcon size={20} />
-                </button>
-
-                <button className="text-gray-500 hover:text-blue-700">
-                  <PaperclipIcon size={20} />
-                </button>
-              </div>
-
-              <div>
-                <button
-                  onClick={handleSubmit}
-                  disabled={mutation.isPending}
-                  className="p-2 rounded-lg text-blue-600 bg-linear-to-r from-blue-200 via-blue-200 via-20% to-purple-300 hover:text-blue-700"
-                >
-                  <ArrowRightIcon size={20} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PromptField
+          value={inputValue}
+          isPending={mutation.isPending}
+          disabled={mutation.isPending}
+          onChange={(e) => setInputValue(e.target.value)}
+          onSubmit={handleSubmit}
+        />
       </div>
     </section>
   );
