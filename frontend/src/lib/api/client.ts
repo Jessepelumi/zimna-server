@@ -47,5 +47,19 @@ export async function apiClient<T>(
     throw new Error(`Error ${response.status}: ${text}`);
   }
 
-  return response.json();
+  if (response.status === 204) {
+    return {} as T;
+  }
+
+  const text = await response.text();
+  if (!text) {
+    return {} as T;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch (e) {
+    console.error("Failed to parse JSON:", text, e);
+    return {} as T;
+  }
 }
