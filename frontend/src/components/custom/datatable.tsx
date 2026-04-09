@@ -26,6 +26,8 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  
+
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
@@ -67,7 +69,7 @@ export function DataTable<TData, TValue>({
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell key={cell.id} className="max-w-125 truncate whitespace-nowrap overflow-hidden">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
