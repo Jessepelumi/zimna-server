@@ -4,6 +4,7 @@ import {
   PlusIcon,
   XIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import { useRouter } from "next/navigation";
 
 interface GoalTileProps {
   id: string;
@@ -24,6 +25,13 @@ export const GoalTile = ({
   onDelete,
   isDeleting,
 }: GoalTileProps) => {
+  const router = useRouter();
+
+  const handleOpenConsole = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/console/${id}`);
+  };
+
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation(); // Stop accordion from toggling
     if (confirm(`Are you sure you want to delete "${title}"?`)) {
@@ -70,7 +78,7 @@ export const GoalTile = ({
         <LineVerticalIcon className="text-gray-400" />
 
         <button
-          onClick={(e) => e.stopPropagation()}
+          onClick={handleOpenConsole}
           className="group  border-black px-1.5 py-1 rounded flex items-center gap-0 transition-all duration-300 hover:gap-2 hover:text-blue-700"
         >
           <PlusIcon size={14} className="shrink-0" />
