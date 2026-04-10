@@ -100,6 +100,37 @@ This package contains provider wrappers and prompt definitions for AI.
 
 ## How Components Connect
 
+### Workflow Chart
+
+```mermaid
+flowchart TD
+  A[Frontend Request] -->|POST /api/decompose/| B[goals.views.DecomposeGoalView]
+  B --> C[ZimnaWorkflow.create_goals_from_ai()]
+  C --> D[GeminiProvider.generate_structured_response()]
+  D --> E[Parse AI JSON into goals/tasks]
+  E --> F[Save Goal and Task models to DB]
+  F --> G[Return created goals/tasks JSON]
+
+  A2[Frontend Request] -->|GET /api/list/| H[goals.views.GoalListView]
+  H --> I[Query Goal.objects.filter(user)]
+  I --> J[Prefetch related tasks]
+  J --> K[Return goals + tasks JSON]
+
+  A3[Frontend Request] -->|POST /api/conversations/chat/| L[conversations.views.ChatAPIView]
+  L --> M[Get or create Conversation]
+  M --> N[Save user Message]
+  N --> O[GeminiProvider.classify_intent()]
+  O -->|DECOMPOSE| C
+  O -->|CHAT| P[GeminiProvider.generate_response()]
+  O -->|QUERY| Q[Return placeholder response]
+  P --> R[Save AI Message]
+  R --> S[Return chat response JSON]
+
+  A4[Frontend Request] -->|GET /api/conversations/history/<uuid>/| T[conversations.views.ConversationHistoryView]
+  T --> U[Query latest conversation for goal/user]
+  U --> V[Return serialized message history]
+```
+
 ### Authentication and User Flow
 
 1. External auth provider verifies the user and sends a verified email to the backend.
