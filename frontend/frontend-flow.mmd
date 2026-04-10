@@ -1,0 +1,75 @@
+flowchart TD
+    %% User Interaction Layer
+    User[👤 User] -->|Interacts with| Pages
+
+    %% Pages Layer
+    subgraph Pages["📄 Pages Layer"]
+        Landing["Landing Page<br/>page.tsx"]
+        Login["Login Page<br/>(auth)/login/page.tsx"]
+        Home["Home Page<br/>(dashboard)/home/page.tsx"]
+        Goals["Goals Page<br/>(dashboard)/goals/page.tsx"]
+        Console["Console Page<br/>(dashboard)/console/[id]/page.tsx"]
+        Objectives["Objectives Page<br/>(dashboard)/objectives/page.tsx"]
+    end
+
+    %% Components Layer
+    subgraph Components["🧩 Components Layer"]
+        CustomComp["Custom Components<br/>goalAccordion, goalTile,<br/>promptField, sidebar, etc."]
+        UIComp["UI Components<br/>shadcn/ui: button, input,<br/>table, badge, etc."]
+        Providers["Providers<br/>NextAuthProvider,<br/>QueryProvider"]
+    end
+
+    %% Data Layer
+    subgraph Data["💾 Data Layer"]
+        Hooks["Custom Hooks<br/>useGoals, useChat,<br/>useDeleteGoal"]
+        APIClient["API Client<br/>apiClient with auth"]
+        APIEndpoints["API Endpoints<br/>goals.ts, chat.ts"]
+    end
+
+    %% Middleware Layer
+    subgraph Middleware["🔗 Middleware Layer"]
+        ProxyRoute["Proxy Route<br/>/api/[...path]/route.ts"]
+        AuthRoute["Auth Route<br/>/api/auth/[...nextauth]/route.ts"]
+        RouteProtection["Route Protection<br/>middleware.ts"]
+    end
+
+    %% Backend
+    Backend["🐍 Django Backend API<br/>/decompose/, /list/,<br/>/conversations/chat/,<br/>/users/auth/bridge/"]
+
+    %% Flow Connections
+    Pages -->|Render| Components
+    Components -->|Use| Data
+    Data -->|Call| Middleware
+    Middleware -->|Proxy| Backend
+
+    %% Authentication Flow
+    User -->|Login| Login
+    Login -->|OAuth| AuthRoute
+    AuthRoute -->|Bridge| Backend
+
+    %% Route Protection
+    Pages -->|Protected| RouteProtection
+    RouteProtection -->|Check Auth| AuthRoute
+
+    %% Data Flow Details
+    Home -->|Goal Creation| Hooks
+    Goals -->|Goal Display| Hooks
+    Console -->|Chat Messages| Hooks
+
+    Hooks -->|API Calls| APIClient
+    APIClient -->|Authenticated Requests| ProxyRoute
+
+    %% Styling
+    classDef pageClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef componentClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef dataClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef middlewareClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef backendClass fill:#ffebee,stroke:#b71c1c,stroke-width:2px
+    classDef userClass fill:#f5f5f5,stroke:#424242,stroke-width:2px
+
+    class User userClass
+    class Landing,Login,Home,Goals,Console,Objectives pageClass
+    class CustomComp,UIComp,Providers componentClass
+    class Hooks,APIClient,APIEndpoints dataClass
+    class ProxyRoute,AuthRoute,RouteProtection middlewareClass
+    class Backend backendClass
