@@ -17,7 +17,7 @@ class GeminiProvider:
                 model=self.model_name,
                 contents=prompt,
                 config=types.GenerateContentConfig(
-                    system_instruction="You are Zimna, a supportive AI life coach."
+                    system_instruction="You are Yiyara, a supportive AI life coach."
                 )
             )
             return response.text

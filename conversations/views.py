@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Conversation, Message
 from .serializers import MessageSerializer
-from .services import handle_zimna_logic
+from .services import handle_yiyara_logic
 from goals.models import Goal
 
 class ChatAPIView(APIView):
@@ -34,7 +34,7 @@ class ChatAPIView(APIView):
 
         # Process logic (Classification -> Action -> Response)
         try:
-            ai_message = handle_zimna_logic(user, conversation, raw_text)
+            ai_message = handle_yiyara_logic(user, conversation, raw_text)
             
             # Return the response with the conversation_id 
             # so the frontend can "lock in" this chat thread

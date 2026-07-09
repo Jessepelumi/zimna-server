@@ -178,8 +178,8 @@ http {
 
 ```bash
 # Clone repository
-git clone https://github.com/your-username/zimna.git
-cd zimna
+git clone https://github.com/your-username/yiyara-api.git
+cd yiyara-api
 
 # Create production env file
 cp .env.example .env.prod

@@ -27,7 +27,7 @@ class DecomposeGoalView(APIView):
         
         # Initialize workflow with Gemini key
         api_key = os.environ.get('GEMINI_API_KEY')
-        workflow = ai_engine.ZimnaWorkflow(api_key=api_key)
+        workflow = ai_engine.YiyaraWorkflow(api_key=api_key)
 
         try:
             created_goals = workflow.create_goals_from_ai(request.user, raw_input)

@@ -7,7 +7,7 @@ from ai.providers.gemini_provider import GeminiProvider
 from ai.prompts.goal_decomposition_prompt import DECOMPOSITION_SYSTEM_PROMPT
 from conversations.models import Conversation, Message
 
-class ZimnaWorkflow:
+class YiyaraWorkflow:
     def __init__(self, api_key):
         self.provider = GeminiProvider()
 

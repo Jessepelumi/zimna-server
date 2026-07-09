@@ -1,12 +1,12 @@
 from ai.providers.gemini_provider import GeminiProvider
-from workflow.ai_engine import ZimnaWorkflow
+from workflow.ai_engine import YiyaraWorkflow
 from .models import Message
 from django.db import transaction
 
 
-def handle_zimna_logic(user, conversation, raw_text):
+def handle_yiyara_logic(user, conversation, raw_text):
     provider = GeminiProvider()
-    workflow = ZimnaWorkflow()
+    workflow = YiyaraWorkflow()
 
     # Save User Message immediately (No transaction here - save it immediately)
     Message.objects.create(conversation=conversation, role='user', content=raw_text)
@@ -28,7 +28,7 @@ def handle_zimna_logic(user, conversation, raw_text):
         response_text = "I'm checking your current goals... (RAG logic pending)"
         
     else:
-        # Provide context so Zimna has 'memory'
+        # Provide context so Yiyara has 'memory'
         history = get_chat_history(conversation, limit=6)
         response_text = provider.generate_response(raw_text, history=history)
 
