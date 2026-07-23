@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
+from django.db import models, IntegrityError, transaction
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.password_validation import validate_password
 
 # Custom user manager to create admin superuser
 class UserManager(BaseUserManager):
@@ -13,6 +15,7 @@ class UserManager(BaseUserManager):
 
         user = self.model(email=email, **extra_fields)
         if password:
+            validate_password(password, user=user)
             user.set_password(password)
         else:
             user.set_unusable_password()
@@ -87,13 +90,24 @@ class User(AbstractUser):
         # Auto-generate username from email
         if not self.username:
             base_username = self.email.split("@")[0]
-            username = base_username
+            candidate = base_username
             counter = 1
+            max_attempts = 10
 
-            while User.objects.filter(username=username).exclude(pk=self.pk).exists():
-                username = f"{base_username}{counter}"
-                counter += 1
-            self.username = username
+            for attempts in range(max_attempts):
+                self.username = candidate
+                try:
+                    with transaction.atomic():
+                        super().save(*args, **kwargs)
+                    return
+                except IntegrityError:
+                    counter += 1
+                    candidate = f"{base_username}{counter}"
+
+            raise IntegrityError(
+                f"Could not generate a unique username for {self.email} "
+                f"after {max_attempts} attempts."
+            )
 
         super().save(*args, **kwargs)
 
